@@ -261,14 +261,13 @@ export default {
     data() {
         return {
             accounts: [],
-            showTransactionWindow: false, //
-            showReportWindow: false, //
-            showReportsTable: false, //
+            showTransactionWindow: false,
+            showReportWindow: false,
+            showReportsTable: false,
             transaction: {
                 fromAccountId: '',
                 toAccountId: '',
-                externalAccount: '', //
-                //internalAccountId: '', //
+                externalAccount: '',
                 amount: '',
                 currency: ''
             },
@@ -292,13 +291,6 @@ export default {
             }
             return [];
         },
-
-        // filteredAccReports() {
-        //     if (this.reportFilters.currency === '') {
-        //         return this.accounts;
-        //     }
-        //     return this.accounts.filter(account => account.currency === this.reportFilters.currency);
-        // },
 
         filteredReports() {
             return this.reports.filter(report => {
