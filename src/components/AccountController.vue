@@ -1,4 +1,3 @@
-<!-- AccountController.vue -->
 <template>
     <div class="bg-white w-3/5 m-auto rounded-xl shadow-xl mt-12">
         <header class="flex justify-between border-b border-slate-300 px-8">
@@ -255,6 +254,7 @@
     </div>
 </template>
 
+
 <script>
 export default {
     name: "AccountController",
@@ -457,7 +457,7 @@ export default {
             } else {
                 this.transactionMoney(fromAccountId, externalAccount, amount, true);
             }
-            this.closeWindow('Transaction');
+            this.closeTransactionWindow('Transaction');
         },
         formatBalance(balance, currency) {
             if (currency === 'RUB') {
