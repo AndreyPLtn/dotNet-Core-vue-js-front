@@ -312,36 +312,28 @@ export default {
                     }
                 }
 
-                if (this.reportFilters.transactionType && this.reportFilters.transactionType !== '') {
-                    if (this.reportFilters.transactionType !== 'Все') {
-                        if (this.reportFilters.transactionType === 'internal') {
-                            if (!this.isInternalTransaction(report)) {
-                                return false;
-                            }
-                        } else if (this.reportFilters.transactionType === 'external') {
-                            if (this.isInternalTransaction(report)) {
-                                return false;
-                            }
-                        }
-                    }
-                }
                 return true;
             });
         },
     },
     methods: {
-        fetchAccounts() {
-            const getToken = sessionStorage.getItem('token');
-            if (!getToken) {
-                console.log('Токен авторизации не получен');
-                return;
+        getToken() {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                console.log('Ошибка получения токена при авторизации');
+                return null;
             }
+            return token;
+        },
+        fetchAccounts() {
+            const token = this.getToken();
+            if (!token) return;
 
             fetch('http://localhost:5157/Account/account/getAccounts', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + getToken
+                    'Authorization': `Bearer ${token}`
                 }
             })
                 .then(response => response.json())
@@ -361,7 +353,7 @@ export default {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                 }
             })
                 .then(response => response.json())
@@ -377,7 +369,7 @@ export default {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                 }
             })
                 .then(response => response.json())
@@ -403,7 +395,7 @@ export default {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                 },
                 body: JSON.stringify({ fromAccountId, toAccountId: externalAccountId, amount })
             })
@@ -430,7 +422,7 @@ export default {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                 },
                 body: JSON.stringify({ fromAccountId, toAccountId: internalAccountId, amount })
             })
@@ -457,7 +449,7 @@ export default {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                 }
             })
                 .then(response => response.json())
