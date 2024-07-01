@@ -291,7 +291,6 @@ export default {
             }
             return [];
         },
-
         filteredReports() {
             return this.reports.filter(report => {
                 if (this.reportFilters.currency && this.reportFilters.currency !== '') {
@@ -299,19 +298,16 @@ export default {
                         return false;
                     }
                 }
-
                 if (this.reportFilters.fromAccountId && this.reportFilters.fromAccountId !== '') {
                     if (this.reportFilters.fromAccountId !== 'Все' && report.fromAccountId !== this.reportFilters.fromAccountId) {
                         return false;
                     }
                 }
-
                 if (this.reportFilters.toAccountId && this.reportFilters.toAccountId !== '') {
                     if (this.reportFilters.toAccountId !== 'Все' && report.toAccountId !== this.reportFilters.toAccountId) {
                         return false;
                     }
                 }
-
                 return true;
             });
         },
@@ -380,7 +376,7 @@ export default {
                     console.error('Ошибка конвертации:', error);
                 });
         },
-        externalTransactionMoney(fromAccountId, externalAccountId, amount) {
+        transactionMoney(fromAccountId, toAccountId, amount, isExternal = false) {
             const fromAccount = this.accounts.find(acc => acc.id === fromAccountId);
             if (!fromAccount) {
                 alert('Неверно указан счет отправителя');
@@ -390,41 +386,16 @@ export default {
                 alert('Недостаточно средств на счете отправителя');
                 return;
             }
-
-            fetch(`http://localhost:5157/Account/account/transaction?fromAccountId=${fromAccountId}&toAccountId=${externalAccountId}&amount=${amount}`, {
+            const url = isExternal
+                ? `http://localhost:5157/Account/account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`
+                : `http://localhost:5157/Account/account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`;
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ fromAccountId, toAccountId: externalAccountId, amount })
-            })
-                .then(response => response.json())
-                .then(() => {
-                    this.fetchAccounts();
-                })
-                .catch(error => {
-                    console.error('Ошибка перевода:', error);
-                });
-        },
-        internalTransactionMoney(fromAccountId, internalAccountId, amount) {
-            const fromAccount = this.accounts.find(acc => acc.id === fromAccountId);
-            if (!fromAccount) {
-                alert('Неверно указан счет отправителя');
-                return;
-            }
-            if (fromAccount.balance < amount) {
-                alert('Недостаточно средств на счете отправителя');
-                return;
-            }
-
-            fetch(`http://localhost:5157/Account/account/transaction?fromAccountId=${fromAccountId}&toAccountId=${internalAccountId}&amount=${amount}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ fromAccountId, toAccountId: internalAccountId, amount })
+                body: JSON.stringify({ fromAccountId, toAccountId, amount })
             })
                 .then(response => response.json())
                 .then(() => {
@@ -444,7 +415,6 @@ export default {
                 toAccountId: toAccountId === 'Все' ? '' : toAccountId,
                 transactionType: transactionType === 'Все' ? '' : transactionType
             }).toString();
-
             fetch(`http://localhost:5157/Report/report?${queryParams}`, {
                 method: 'GET',
                 headers: {
@@ -483,11 +453,11 @@ export default {
             }
 
             if (this.transferType === 'internal') {
-                this.internalTransactionMoney(fromAccountId, toAccountId, amount);
+                this.transactionMoney(fromAccountId, toAccountId, amount);
             } else {
-                this.externalTransactionMoney(fromAccountId, externalAccount, amount);
+                this.transactionMoney(fromAccountId, externalAccount, amount, true);
             }
-            this.closeTransactionWindow();
+            this.closeWindow('Transaction');
         },
         formatBalance(balance, currency) {
             if (currency === 'RUB') {
@@ -533,7 +503,6 @@ export default {
                 }
             }
         },
-
         isInternalTransaction(report) {
             return this.accounts.some(account => account.id === report.toAccountId);
         }
