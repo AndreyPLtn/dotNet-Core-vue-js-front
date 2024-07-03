@@ -325,7 +325,7 @@ export default {
             const token = this.getToken();
             if (!token) return;
 
-            fetch('http://localhost:5157/Account/account/getAccounts', {
+            fetch('http://localhost:5157/Account/getAccounts', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -345,7 +345,7 @@ export default {
                 alert('Вы не можете создать более 5 аккаунтов.');
                 return;
             }
-            fetch(`http://localhost:5157/Account/account/create?currency=${currency}`, {
+            fetch(`http://localhost:5157/Account/create?currency=${currency}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -361,7 +361,7 @@ export default {
                 });
         },
         convertCurrency(id, targetCurrency) {
-            fetch(`http://localhost:5157/Account/account/convert?accountId=${id}&targetCurrency=${targetCurrency}`, {
+            fetch(`http://localhost:5157/Account/convert?accountId=${id}&targetCurrency=${targetCurrency}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -387,8 +387,8 @@ export default {
                 return;
             }
             const url = isExternal
-                ? `http://localhost:5157/Account/account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`
-                : `http://localhost:5157/Account/account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`;
+                ? `http://localhost:5157/Account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`
+                : `http://localhost:5157/Account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`;
             fetch(url, {
                 method: 'POST',
                 headers: {

@@ -71,7 +71,6 @@ export default {
         })
         .then(text => {
           console.log(text);
-          //sessionStorage.setItem('token', json.token);
           this.login();
         })
         .catch(error => {
