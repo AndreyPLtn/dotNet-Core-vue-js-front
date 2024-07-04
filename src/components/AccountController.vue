@@ -361,7 +361,7 @@ export default {
         },
         async convertCurrency(id, targetCurrency) {
             try {
-                const response = await fetch(`http://localhost:5157/Account/convert?accountId=${id}&targetCurrency=${targetCurrency}`, {
+                const response = await fetch(`http://localhost:5157/Currency/convert?accountId=${id}&targetCurrency=${targetCurrency}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -386,8 +386,8 @@ export default {
             }
 
             const url = isExternal
-                ? `http://localhost:5157/Account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`
-                : `http://localhost:5157/Account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`;
+                ? `http://localhost:5157/Transaction/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`
+                : `http://localhost:5157/Transaction/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`;
 
             try {
                 const response = await fetch(url, {
