@@ -6,7 +6,7 @@
                     <img src="@/assets/logo1.png" alt="Logo" />
                     <div>
                         <h2 class="text-xl font-bold uppercase">ТГК-2 Энергосбыт</h2>
-                        <p class="text-slate-400 mb-4">Конвертации/Транзакции/Отчеты</p>
+                        <p class="text-slate-400 mb-4">Выйти из аккаунта</p>
                     </div>
                 </router-link>
             </div>
@@ -321,62 +321,60 @@ export default {
             }
             return token;
         },
-        fetchAccounts() {
+        async fetchAccounts() {
             const token = this.getToken();
             if (!token) return;
 
-            fetch('http://localhost:5157/Account/getAccounts', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    this.accounts = data;
-                })
-                .catch(error => {
-                    console.error('Ошибка получения счетов:', error);
+            try {
+                const response = await fetch('http://localhost:5157/Account/getAccounts', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
+                const data = await response.json();
+                this.accounts = data;
+            } catch (error) {
+                console.error('Ошибка получения счетов:', error);
+            }
         },
-        createAccount(currency) {
+        async createAccount(currency) {
             if (this.accounts.length >= 5) {
                 alert('Вы не можете создать более 5 аккаунтов.');
                 return;
             }
-            fetch(`http://localhost:5157/Account/create?currency=${currency}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-                }
-            })
-                .then(response => response.json())
-                .then(() => {
-                    this.fetchAccounts();
-                })
-                .catch(error => {
-                    console.error('Ошибка создания счета:', error);
+
+            try {
+                const response = await fetch(`http://localhost:5157/Account/create?currency=${currency}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+                    }
                 });
+                await response.json();
+                this.fetchAccounts();
+            } catch (error) {
+                console.error('Ошибка создания счета:', error);
+            }
         },
-        convertCurrency(id, targetCurrency) {
-            fetch(`http://localhost:5157/Account/convert?accountId=${id}&targetCurrency=${targetCurrency}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-                }
-            })
-                .then(response => response.json())
-                .then(() => {
-                    this.fetchAccounts();
-                })
-                .catch(error => {
-                    console.error('Ошибка конвертации:', error);
+        async convertCurrency(id, targetCurrency) {
+            try {
+                const response = await fetch(`http://localhost:5157/Account/convert?accountId=${id}&targetCurrency=${targetCurrency}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+                    }
                 });
+                await response.json();
+                this.fetchAccounts();
+            } catch (error) {
+                console.error('Ошибка конвертации:', error);
+            }
         },
-        transactionMoney(fromAccountId, toAccountId, amount, isExternal = false) {
+        async transactionMoney(fromAccountId, toAccountId, amount, isExternal = false) {
             const fromAccount = this.accounts.find(acc => acc.id === fromAccountId);
             if (!fromAccount) {
                 alert('Неверно указан счет отправителя');
@@ -386,26 +384,27 @@ export default {
                 alert('Недостаточно средств на счете отправителя');
                 return;
             }
+
             const url = isExternal
                 ? `http://localhost:5157/Account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`
                 : `http://localhost:5157/Account/transaction?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`;
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ fromAccountId, toAccountId, amount })
-            })
-                .then(response => response.json())
-                .then(() => {
-                    this.fetchAccounts();
-                })
-                .catch(error => {
-                    console.error('Ошибка перевода:', error);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ fromAccountId, toAccountId, amount })
                 });
+                await response.json();
+                this.fetchAccounts();
+            } catch (error) {
+                console.error('Ошибка перевода:', error);
+            }
         },
-        fetchReports() {
+        async fetchReports() {
             const { startDate, endDate, currency, fromAccountId, toAccountId, transactionType } = this.reportFilters;
             const queryParams = new URLSearchParams({
                 startDate,
@@ -415,21 +414,21 @@ export default {
                 toAccountId: toAccountId === 'Все' ? '' : toAccountId,
                 transactionType: transactionType === 'Все' ? '' : transactionType
             }).toString();
-            fetch(`http://localhost:5157/Report/report?${queryParams}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    this.reports = data;
-                    this.showReportsTable = true;
-                })
-                .catch(error => {
-                    console.error('Ошибка получения отчетов:', error);
+
+            try {
+                const response = await fetch(`http://localhost:5157/Report/report?${queryParams}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+                    }
                 });
+                const data = await response.json();
+                this.reports = data;
+                this.showReportsTable = true;
+            } catch (error) {
+                console.error('Ошибка получения отчетов:', error);
+            }
         },
         formatDate(value) {
             if (value) {
@@ -444,7 +443,7 @@ export default {
             }
             return value;
         },
-        submitTransaction() {
+        async submitTransaction() {
             const { fromAccountId, toAccountId, amount, externalAccount } = this.transaction;
             if (!fromAccountId || !amount || (this.transferType === 'internal' && !toAccountId)
                 || (this.transferType === 'external' && !externalAccount)) {
@@ -453,9 +452,9 @@ export default {
             }
 
             if (this.transferType === 'internal') {
-                this.transactionMoney(fromAccountId, toAccountId, amount);
+                await this.transactionMoney(fromAccountId, toAccountId, amount);
             } else {
-                this.transactionMoney(fromAccountId, externalAccount, amount, true);
+                await this.transactionMoney(fromAccountId, externalAccount, amount, true);
             }
             this.closeTransactionWindow('Transaction');
         },
