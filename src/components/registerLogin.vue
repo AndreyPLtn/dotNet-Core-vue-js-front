@@ -45,62 +45,58 @@ export default {
     autoChange() {
       this.isLogin = !this.isLogin;
     },
-    handleSubmit() {
+    async handleSubmit() {
       if (this.isLogin) {
-        this.login();
+        await this.login();
       } else {
-        this.register();
+        await this.register();
       }
     },
-    register() {
+    async register() {
       console.log('Регистрация: ', this.username, this.password);
 
-      fetch('http://localhost:5157/User/register?username=' + this.username + '&password=' + this.password, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then(response => {
-          if (!response.ok) {
-            return response.text().then(errorText => {
-              throw new Error(errorText);
-            });
-          }
-          return response.text();
-        })
-        .then(text => {
-          console.log(text);
-          this.login();
-        })
-        .catch(error => {
-          alert('Ошибка регистрации: ' + error.message);
+      try {
+        const response = await fetch(`http://localhost:5157/User/register?username=${this.username}&password=${this.password}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText);
+        }
+
+        const text = await response.text();
+        console.log(text);
+        await this.login();
+      } catch (error) {
+        alert('Ошибка регистрации: ' + error.message);
+      }
     },
-    login() {
+    async login() {
       console.log('Вход: ', this.username, this.password);
 
-      fetch('http://localhost:5157/User/login?username=' + this.username + '&password=' + this.password, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      })
-        .then(response => {
-          if (!response.ok) {
-            return response.json().then(errorData => {
-              throw new Error(errorData);
-            });
-          }
-          return response.json();
-        })
-        .then(json => {
-          sessionStorage.setItem("token", json.token);
-          this.goToAccount();
-        })
-        .catch(error => {
-          alert('Ошибка входа: ' + error.message);
+      try {
+        const response = await fetch(`http://localhost:5157/User/login?username=${this.username}&password=${this.password}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
         });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData);
+        }
+
+        const json = await response.json();
+        sessionStorage.setItem("token", json.token);
+        this.goToAccount();
+      } catch (error) {
+        alert('Ошибка входа: ' + error.message);
+      }
     },
     goToAccount() {
       console.log(this.$router);
